@@ -86,6 +86,8 @@ def plant_seeds(seedling, soil):
 def animal_event(luck, scarecrow, garden_list):
     #animal event based on luck
     animals = round(luck/2)
+    if animals == 6:
+        animals -= 1
     #animals can't be 0 due to list
     if animals == 0:
         animals += 1
@@ -277,7 +279,7 @@ def main():
                 print(f"You check the news for the forecast today: {weather}")
 
                 #generate random amount of money
-                payday = randint(15,30)
+                payday = randint(15,30) + day_luck
                 print(f"You return to your garden after a day of work +${payday}")
                 money += payday
 
