@@ -28,7 +28,9 @@ _ANIMAL_EVENT = ["Crows destroyed you're whole garden in the middle of the night
                  "No animals visited","Some bees are pollinating your flowers", "Some birds planted some seeds of their own!"]
 _WEATHER_MENU = [1,2,3,4,5]
 _WEATHER = {"Cold": -4,"Thunder Storm": -2,"Nice": 0, "Warm": 2, "Raining": 4}
+_SEED_MAX = 99
 
+#function to determine if user input is a valid menu selection
 def valid_menu(user_text, menu_len):
     while True:
         if user_text.isnumeric():
@@ -42,24 +44,28 @@ def valid_menu(user_text, menu_len):
 
     return output
 
+#print function of main menu
 def menu():
     print("1. View Garden")
     print("2. Store")
     print("3. Sleep")
     print("4. Exit")
 
+#print function of garden submenu
 def garden_menu():
     print("1. Plant seeds")
     print("2. Water plants")
     print("3. Smell the flowers")
     print("4. Return")
 
+#print function of store menu
 def store_menu():
     i = 1
     for items in _STORE_ITEMS.values():
         print(f"{i}. BUY {items[1]} - ${items[0]}")
         i += 1
 
+#function of first checking if user is able to buy item and purchase item if available
 def buy(item, cost, spent):
     afford = False
     if cost > spent:
@@ -69,6 +75,7 @@ def buy(item, cost, spent):
         afford = True
     return afford
 
+#function to check is user already has bought item
 def bought(held_item):
     purchased = False
     if held_item:
@@ -76,6 +83,7 @@ def bought(held_item):
         print("You have already bought this item")
     return purchased
 
+#function to plant user selected amount of seeds and randomly select type of flower to plant
 def plant_seeds(seedling, soil):
     if seedling > 0:
         for i in range(seedling):
@@ -83,9 +91,11 @@ def plant_seeds(seedling, soil):
             soil.append(_FLOWER_SEEDS.get(bloom))
     return soil
 
+#function to set random animal event when user sleeps
 def animal_event(luck, scarecrow, garden_list):
     #animal event based on luck
     animals = round(luck/2)
+    #if statement used for when user luck is 11 due to glasses item
     if animals == 6:
         animals -= 1
     #animals can't be 0 due to list
@@ -106,16 +116,20 @@ def animal_event(luck, scarecrow, garden_list):
         case 3:
             pass
         case 4:
-            garden_list.append(_FLOWER_SEEDS[randint(1001,1004)])
+            if len(garden_list) < 99:
+                garden_list.append(_FLOWER_SEEDS[randint(1001,1004)])
         case 5:
-            garden_list.extend([_FLOWER_SEEDS[randint(1001, 1004)], _FLOWER_SEEDS[randint(1001, 1004)]])
+            if len(garden_list) < 98:
+                garden_list.extend([_FLOWER_SEEDS[randint(1001, 1004)], _FLOWER_SEEDS[randint(1001, 1004)]])
+            elif len(garden_list) < 99:
+                garden_list.append(_FLOWER_SEEDS[randint(1001, 1004)])
 
     return garden_list
 
+#function of setting the new daily weather
 def daily_weather():
     rand_weather = randint(1,5)
     temp = ""
-
     match rand_weather:
         case 1:
             temp = "Cold"
@@ -130,6 +144,7 @@ def daily_weather():
 
     return temp
 
+#main function
 def main():
     ############
     # VARIABLES
@@ -162,9 +177,13 @@ def main():
                     print("Garden is empty")
                 else:
                 # print off each flower in garden
-                    for flowers in garden:
+                    for i, flowers in enumerate(garden):
+                        #if amount of flowers, wrap print onto a new line to keep flowers neat
+                        if i%18 == 0 and i != 0:
+                            print()
                         print(flowers, end="")
                     print()
+                print(f"Your garden is {len(garden) + planted_seeds}/99 filled")
 
                 #Garden submenu
                 while True:
@@ -174,6 +193,7 @@ def main():
                     garden_menu()
                     garden_input = input("Enter choice: ")
 
+
                     #checks if user input is valid and how long the menu is
                     match valid_menu(garden_input, _GARDEN_MENU):
                         #plant seeds and tells user how many seeds they have
@@ -181,11 +201,14 @@ def main():
                             if seeds == 0:
                                 print(_BREAK)
                                 print("You have no seeds left")
+                            elif (len(garden) + planted_seeds) == _SEED_MAX:
+                                print(_BREAK)
+                                print("Your garden is full")
                             else:
                                 plant = input(f"You have {seeds} seeds left, how many do you want to plant? ")
                                 while True:
                                     if plant.isnumeric():
-                                        if int(plant) <= seeds:
+                                        if int(plant) <= seeds and (int(plant) + len(garden) + planted_seeds) <= _SEED_MAX and int(plant) <= _SEED_MAX:
                                             print(_BREAK)
                                             print(f"you plant {plant} seeds")
                                             planted_seeds = planted_seeds + int(plant)
@@ -193,23 +216,34 @@ def main():
                                             break
                                         elif int(plant) > seeds:
                                             plant = input("You don't have this many seeds, please try again: ")
+                                        elif len(garden) == _SEED_MAX:
+                                            print("You ran out of space")
+                                            break
+                                        else:
+                                            plant = input("You don't have that many pots left, please try again:")
                                     else:
                                         plant = input("Not a valid input, please try again: ")
                         #water plants, ~15% chance for a new seed to be planted on own
                         case 2:
-                            water_plant = randint(1, 100)
-                            print(_BREAK)
-                            if not watered and weather != "Raining":
-                                print("You fill up your watering can and water the flowers")
-                                if (water_percent + day_luck/2 + int(_WEATHER.get(weather))) > water_plant:
-                                    planted_seeds += 1
-                                watered = True
-                            elif weather == "Raining":
-                                print("It's raining, no need to water the plants today")
-                                if (water_percent + day_luck/2 + int(_WEATHER.get(weather))) > water_plant:
-                                    planted_seeds += 1
+                            if (len(garden) + planted_seeds) == _SEED_MAX:
+                                print(_BREAK)
+                                print("No need to water the plants, the garden is full")
                             else:
-                                print("You already watered your plants today")
+                                water_plant = randint(1, 100)
+                                print(_BREAK)
+                                if not watered and weather != "Raining":
+                                    print("You fill up your watering can and water the flowers")
+                                    if (water_percent + day_luck/2 + int(_WEATHER.get(weather))) > water_plant:
+                                        planted_seeds += 1
+                                        print("+1 planted seed")
+                                    watered = True
+                                elif weather == "Raining":
+                                    print("It's raining, no need to water the plants today")
+                                    if (water_percent + day_luck/2 + int(_WEATHER.get(weather))) > water_plant and (len(garden) + planted_seeds) != _SEED_MAX:
+                                        planted_seeds += 1
+                                        print("+1 planted seed")
+                                else:
+                                    print("You already watered your plants today")
                         #smell the flowers, no purpose atm
                         case 3:
                             print(_BREAK)
