@@ -26,7 +26,6 @@ _GARDEN_MENU = 4
 _STORE_ITEMS = {1: [10, "pack of seeds"], 2: [25, "scarecrow"], 3: [50, "cool glasses"], 4: [65, "upgraded watering can"]}
 _ANIMAL_EVENT = ["Crows destroyed you're whole garden in the middle of the night", "A squirrel trampled some flowers",
                  "No animals visited","Some bees are pollinating your flowers", "Some birds planted some seeds of their own!"]
-_WEATHER_MENU = [1,2,3,4,5]
 _WEATHER = {"Cold": -4,"Thunder Storm": -2,"Nice": 0, "Warm": 2, "Raining": 4}
 _SEED_MAX = 99
 
@@ -168,7 +167,7 @@ def main():
         menu()
         select = input("Enter choice: ")
 
-        match(valid_menu(select, _MAIN_MENU)):
+        match valid_menu(select,_MAIN_MENU):
             #Garden Branch
             case 1:
                 print(_BREAK)
@@ -332,6 +331,10 @@ def main():
             #exit program
             case 4:
                 sys.exit()
+            #default error value
+            case _:
+                print(_BREAK)
+                print("ERROR, not a valid input")
 
 if __name__ == "__main__":
     main()
