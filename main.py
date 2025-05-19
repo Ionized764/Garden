@@ -29,6 +29,9 @@ _ANIMAL_EVENT = ["Crows destroyed you're whole garden in the middle of the night
 _WEATHER = {"Cold": -4,"Thunder Storm": -2,"Nice": 0, "Warm": 2, "Raining": 4}
 _SEED_MAX = 99
 
+data_save = []
+data_load = []
+
 #function to determine if user input is a valid menu selection
 def valid_menu(user_text, menu_len):
     while True:
@@ -143,6 +146,24 @@ def daily_weather():
 
     return temp
 
+def load():
+    try:
+        f = open("Garden.txt")
+        for file in f:
+            data_load.append(file.strip())
+        f.close()
+        return True
+    except FileNotFoundError:
+        print(_BREAK)
+        print("No previous save file, starting new game")
+        return False
+
+def save():
+    w = open("Garden.txt", "w")
+    w.writelines(data_save)
+    w.close()
+    pass
+
 #main function
 def main():
     ############
@@ -159,6 +180,50 @@ def main():
     glasses_bought = False
     upgrade_bought = False
     watered = False
+
+    global data_save
+    global data_load
+
+    print("1. Load last save")
+    print("2. New Save")
+    load_select = input("Select Load option: ")
+
+    match valid_menu(load_select, 2):
+        case 1:
+            if load():
+                seeds = int(data_load[0])
+                data_load.pop(0)
+                planted_seeds = int(data_load[0])
+                data_load.pop(0)
+                money = int(data_load[0])
+                data_load.pop(0)
+                weather = data_load[0]
+                data_load.pop(0)
+                scare_bought = bool(data_load[0])
+                data_load.pop(0)
+                glasses_bought = bool(data_load[0])
+                data_load.pop(0)
+                upgrade_bought = bool(data_load[0])
+                data_load.pop(0)
+                for data in data_load:
+                    match int(data):
+                        case 1001:
+                            garden.append("🪷")
+                        case 1002:
+                            garden.append("🌷")
+                        case 1003:
+                            garden.append("🌹")
+                        case 1004:
+                            garden.append("🌺")
+                        case _:
+                            pass
+                data_load.clear()
+        case 2:
+            pass
+        case _:
+            print("ERROR, invalid response")
+
+    print(_BREAK)
 
     print("Welcome to the Garden")
     # menu loop
@@ -330,6 +395,19 @@ def main():
                 watered = False
             #exit program
             case 4:
+                data_save = [str(seeds) + "\n", str(planted_seeds) + "\n",str(money) + "\n",weather + "\n",
+                             str(scare_bought) + "\n", str(glasses_bought) + "\n", str(upgrade_bought)+ "\n"]
+                for flowers in garden:
+                    if flowers == "🪷":
+                        save_flower = str(1001) + "\n"
+                    elif flowers == "🌷":
+                        save_flower = str(1002) + "\n"
+                    elif flowers == "🌹":
+                        save_flower = str(1003) + "\n"
+                    else:
+                        save_flower = str(1004) + "\n"
+                    data_save.append(save_flower)
+                save()
                 sys.exit()
             #default error value
             case _:
